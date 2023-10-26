@@ -1,50 +1,41 @@
 const express = require('express');
 const router = express.Router();
+const categoryRouter = require('./category');
+const itemRouter = require('./item');
+
+const productsController = require('../controllers/productController');
 
 // Product routes 
-router.get('/', method)  // Get all products
+router.get('/', productsController.getAllProducts)  // Get all products
 
-router.get('/sale')  // Get Items on sale
+router.get('/sale', productsController.getAllSale)  // Get Items on sale
 
-router.get('/:category')  // Get items of a particular category
+router.get('/create', productsController.getCreateProduct)  // GET create a new product page
 
-router.get('/create', method)  // GET create a new product page
+router.post('/create', productsController.submitNewProduct)  // Create a product submit
 
-router.post('/create', method)  // Create a product submit
-
-router.post('/:id/delete')   // Delete a product
-
-router.get('/:id/update')  // GET update a product form
-
-router.post('/:id/update')  // submit update product form
-
-router.get('/:id')  // Get product page
+router.get('/category/:category', productsController.getProductsByCategory)  // Get items of a particular category
 
 
 
-// PRODUCT INSTANCE ROUTES 
+router.post('/:id/delete', productsController.deleteProductAndInstances)   // Delete a product
 
-router.get('/:id/items')  // GET all instances of a product
+router.get('/:id/update', productsController.getUpdateProduct)  // GET update a product form
 
-router.get('/:id/item/create')   // GET create new item form
+router.post('/:id/update', productsController.submitUpdateProduct)  // submit update product form
 
-router.post('/:id/item/create')  // POST new item form
-
-router.post('/:id/item/:itemID/delete') // DELETE single item
-
-router.get('/:id/item/:itemID/update')  // GET update form
-
-router.post('/:id/item/:itemID/update')   // POST update form
+router.get('/:id', productsController.getSingleProduct)  // Get product page
 
 
 
-// CATEGORY ROUTES
+// PRODUCT INSTANCE ROUTES  /product/:id/item routes
 
-router.get('/category/create')  //  GET create category page
+router.use('/:id/items', itemRouter);
 
-router.post('/category/create')  // SUBMIT category form
+// /product/category Routes
 
-router.post('/category/:id/delete')  // DELETE category
+router.use('/category', categoryRouter);
+
 
 
 module.exports = router
