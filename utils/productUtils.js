@@ -19,8 +19,8 @@ const getProductsByCategoryUtil = async (req) => {
   const categoryIds = categoryObjs.map((obj) => {
     return obj._id;
   })
-
-  return Product.find({category: { $all: categoryIds}}).populate('category');
+  const products = await Product.find({category: { $all: categoryIds}}).populate('category');
+  return products;
 
 }
 

@@ -191,6 +191,44 @@ describe('Get single product page', () => {
   })
 })
 
+describe('create a new category', () => {
+  test('Correct form data should add new category', async () => {
+    let category = {
+      name: "NewCategory"
+    }
+
+    const res = await request(app).post('/products/category/create').send(category);
+    expect(res.statusCode).toBe(201);
+    expect(res.body.category.name).toBe("NewCategory");
+  })
+
+  test('Invalid data should respond with errors', async () => {
+    let category = {
+      name: "n"
+    }
+    const res = await request(app).post('/products/category/create').send(category);
+    expect(res.statusCode).toBe(400);
+    expect(res.body.errors).toBeDefined();
+  })
+})
+
+describe('delete category', () => {
+  test('delete existing category', async () => {
+    let category = new Category({name: 'newCategory'});
+    await category.save();
+    let res = await request(app).post(`/products/category/${category._id}/delete`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.category).toBeDefined()
+  });
+
+  test('delete category does not exist', async () => {
+    let fakeCatId = '653c293235806ff3d416f8d4';
+    let res = await request(app).post(`/products/category/${fakeCatId}/delete`);
+    expect(res.statusCode).toBe(404);
+    expect(res.body.error).toBe('Category does not exist');
+  })
+})
+
 
 async function addProductAndInstance() {
   // find category ids

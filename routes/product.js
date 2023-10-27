@@ -5,6 +5,15 @@ const itemRouter = require('./item');
 
 const productsController = require('../controllers/productController');
 
+// PRODUCT INSTANCE ROUTES  /product/:id/item routes
+
+router.use('/:id/items', itemRouter);
+
+// /product/category Routes
+
+router.use('/category', categoryRouter);
+
+
 // Product routes 
 router.get('/', productsController.getAllProducts)  // Get all products
 
@@ -25,16 +34,6 @@ router.get('/:id/update', productsController.getUpdateProduct)  // GET update a 
 router.post('/:id/update', productsController.submitUpdateProduct)  // submit update product form
 
 router.get('/:id', productsController.getSingleProduct)  // Get product page
-
-
-
-// PRODUCT INSTANCE ROUTES  /product/:id/item routes
-
-router.use('/:id/items', itemRouter);
-
-// /product/category Routes
-
-router.use('/category', categoryRouter);
 
 
 
