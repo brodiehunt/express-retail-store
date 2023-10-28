@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router({mergeParams: true});
 
+const itemsController = require('../controllers/itemController');
 
 
-router.get('/')  // GET all instances of a product
 
-router.get('/create')   // GET create new item form
 
-router.post('/create')  // POST new item form
 
-router.post('/:itemID/delete') // DELETE single item
+router.get('/', itemsController.getAllItemInstances)  // GET all instances of a product
 
-router.get('/:itemID/update')  // GET update form
+router.post('/create', itemsController.submitNewItemInstance)  // POST new item form
 
-router.post('/:itemID/update')   // POST update form
+router.post('/:itemID/delete', itemsController.deleteItem) // DELETE single item
+
+router.post('/:itemID/update', itemsController.submitUpdateItem)   // POST update form
 
 module.exports = router;

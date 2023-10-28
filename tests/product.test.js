@@ -126,9 +126,9 @@ describe('Post a new product', () => {
 
 describe('should delete product and all item instances', () => {
   test('should delete shirt', async () => {
-    const shirt = await addProductAndInstance();
+    const {product} = await addProductAndInstance();
     
-    const res = await request(app).post(`/products/${shirt._id}/delete`);
+    const res = await request(app).post(`/products/${product._id}/delete`);
     
     expect(res.statusCode).toBe(200);
     expect(res.body.productDeleted._id).toBeDefined();
@@ -229,26 +229,105 @@ describe('delete category', () => {
   })
 })
 
+describe('view product instances', () => {
+
+  test('Should return one instance of a product', async () => {
+    let {product} = await addProductAndInstance();
+    const res = await request(app).get(`/products/${product._id}/items`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.length).toBe(1);
+  })
+
+  test('should return no instances', async () => {
+    let product = await addProductNoInstance();
+    const res = await request(app).get(`/products/${product._id}/items`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.length).toBe(0);
+  })
+
+  test('invalid product id return 404', async () => {
+    let productID = '653c293235806ff3d416f8d4';
+    const res = await request(app).get(`/products/${productID}/items`);
+    expect(res.statusCode).toBe(404);
+    expect(res.body.error).toBe('No product found');
+  })
+})
+
+describe('add new product instance', () => {
+
+  test('should add instance to existing product', async () => {
+    const product = await addProductNoInstance();
+    let instanceData = {
+      size: 's',
+      product: product._id
+    };
+    let res = await request(app).post(`/products/${product._id}/items/create`).send(instanceData);
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toBeDefined();
+  });
+
+  test('should return error if product not found', async () => {
+    let productID = '653c293235806ff3d416f8d4';
+    let instanceData = {
+      size: 's',
+      product: productID
+    };
+    const res = await request(app).post(`/products/${productID}/items/create`).send(instanceData);
+    expect(res.statusCode).toBe(404);
+    expect(res.body.error).toBeDefined();
+  })
+
+  test('invalid data for submit should fail validation', async () => {
+    const product = await addProductNoInstance();
+    let instanceData = {
+      product: product._id
+    }
+    const res = await request(app).post(`/products/${product._id}/items/create`).send(instanceData);
+    expect(res.statusCode).toBe(400);
+    expect(res.body.errors.length).toBe(1);
+    expect(res.body.errors[0].msg).toBe('Item size required');
+  })
+})
+
+describe('delete product instance', () => {
+  test('should delete product instance if it exists', async () => {
+    const {product, newInstance} = await addProductAndInstance();
+    const res = await request(app).post(`/products/${product._id}/items/${newInstance._id}/delete`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toBeDefined();
+  })
+
+})
+
+describe('update product instance', () => {
+  test('should update product instance', async () => {
+    const {product, newInstance} = await addProductAndInstance();
+    const updated = {size: 'm'}
+    const res = await request(app).post(`/products/${product._id}/items/${newInstance._id}/update`).send(updated);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.size).toBe('m');
+  })
+});
 
 async function addProductAndInstance() {
   // find category ids
   // create product
   // create instances
   const categories = await Category.find({name: {$in: ['Mens', 'Shirts']}});
-  const newProduct = new Product({
+  const product = new Product({
     title: 'shirt to be deleted',
     description: 'description one',
     price: 100,
     isSale: true,
     category: [categories[0]._id, categories[1]._id]
   })
-  await newProduct.save();
+  await product.save();
   const newInstance = new ProductInstance({
     size: 'M',
-    product: newProduct._id
+    product: product._id
   })
   await newInstance.save();
-  return newProduct;
+  return {product, newInstance};
 }
 
 async function addProductNoInstance() {
